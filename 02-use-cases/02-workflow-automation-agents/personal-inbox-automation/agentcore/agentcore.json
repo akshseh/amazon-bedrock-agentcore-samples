@@ -1,0 +1,120 @@
+{
+  "name": "InboxAgent",
+  "version": 1,
+  "managedBy": "CDK",
+  "runtimes": [
+    {
+      "name": "InboxAgent",
+      "description": "Personal inbox automation agent — triages email, drafts replies, extracts to-dos, unsubscribes from junk",
+      "build": "CodeZip",
+      "entrypoint": "main.py",
+      "codeLocation": "app/inboxagent/",
+      "runtimeVersion": "PYTHON_3_13",
+      "networkMode": "PUBLIC",
+      "protocol": "HTTP",
+      "instrumentation": { "enableOtel": true },
+      "envVars": [
+        { "name": "AGENT_MODEL_ID", "value": "us.anthropic.claude-sonnet-4-6" },
+        { "name": "FAST_MODEL_ID", "value": "us.anthropic.claude-haiku-4-5-20251001-v1:0" },
+        { "name": "LOG_LEVEL", "value": "INFO" }
+      ]
+    }
+  ],
+  "memories": [
+    {
+      "name": "InboxAgentMemory",
+      "eventExpiryDuration": 30,
+      "strategies": [
+        {
+          "type": "SUMMARIZATION",
+          "name": "email_summary",
+          "namespaces": ["inbox/{actorId}/{sessionId}"]
+        }
+      ]
+    }
+  ],
+  "agentCoreGateways": [
+    {
+      "name": "InboxGateway",
+      "description": "MCP Gateway for inbox automation tools",
+      "authorizerType": "AWS_IAM",
+      "targets": [
+        {
+          "name": "get-email",
+          "targetType": "lambdaFunctionArn",
+          "lambdaFunctionArn": {
+            "lambdaArn": "PLACEHOLDER_GET_EMAIL_ARN",
+            "toolSchemaFile": "tool-schemas/get-email.json"
+          }
+        },
+        {
+          "name": "save-task",
+          "targetType": "lambdaFunctionArn",
+          "lambdaFunctionArn": {
+            "lambdaArn": "PLACEHOLDER_SAVE_TASK_ARN",
+            "toolSchemaFile": "tool-schemas/save-task.json"
+          }
+        },
+        {
+          "name": "list-tasks",
+          "targetType": "lambdaFunctionArn",
+          "lambdaFunctionArn": {
+            "lambdaArn": "PLACEHOLDER_LIST_TASKS_ARN",
+            "toolSchemaFile": "tool-schemas/list-tasks.json"
+          }
+        },
+        {
+          "name": "draft-reply",
+          "targetType": "lambdaFunctionArn",
+          "lambdaFunctionArn": {
+            "lambdaArn": "PLACEHOLDER_DRAFT_REPLY_ARN",
+            "toolSchemaFile": "tool-schemas/draft-reply.json"
+          }
+        },
+        {
+          "name": "unsubscribe",
+          "targetType": "lambdaFunctionArn",
+          "lambdaFunctionArn": {
+            "lambdaArn": "PLACEHOLDER_UNSUBSCRIBE_ARN",
+            "toolSchemaFile": "tool-schemas/unsubscribe.json"
+          }
+        }
+      ],
+      "policyEngineConfiguration": {
+        "policyEngineName": "InboxPolicyEngine",
+        "mode": "ENFORCE"
+      }
+    }
+  ],
+  "policyEngines": [
+    {
+      "name": "InboxPolicyEngine",
+      "description": "Cedar policies for bounded inbox autonomy",
+      "policies": [
+        {
+          "name": "AllowAllTools",
+          "description": "Permit all authenticated tool calls",
+          "statement": "permit(principal, action, resource is AgentCore::Gateway);",
+          "validationMode": "IGNORE_ALL_FINDINGS"
+        },
+        {
+          "name": "BlockMassUnsubscribe",
+          "description": "Prevent unsubscribing from more than 10 senders in a single session",
+          "statement": "forbid(principal, action, resource is AgentCore::Gateway) when { context has \"toolName\" && context.toolName == \"unsubscribe\" && context has \"sessionUnsubscribeCount\" && context.sessionUnsubscribeCount >= 10 };",
+          "validationMode": "IGNORE_ALL_FINDINGS"
+        }
+      ]
+    }
+  ],
+  "onlineEvalConfigs": [
+    {
+      "name": "InboxAgentEval",
+      "agent": "InboxAgent",
+      "evaluators": ["Builtin.Correctness", "Builtin.Helpfulness", "Builtin.ToolSelectionAccuracy"],
+      "samplingRate": 100,
+      "description": "Quality monitoring for inbox triage decisions"
+    }
+  ],
+  "credentials": [],
+  "harnesses": []
+}

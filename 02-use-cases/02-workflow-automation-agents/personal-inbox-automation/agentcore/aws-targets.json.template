@@ -1,0 +1,8 @@
+[
+  {
+    "name": "dev",
+    "description": "Development environment",
+    "account": "${CDK_DEFAULT_ACCOUNT}",
+    "region": "${AWS_REGION}"
+  }
+]

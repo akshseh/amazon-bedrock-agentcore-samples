@@ -1,0 +1,54 @@
+# Override root .gitignore exclusion of lib/ — CDK source lives in agentcore/cdk/lib/
+!agentcore/cdk/lib/
+!agentcore/cdk/lib/**
+
+# Python
+*.py[cod]
+*$py.class
+*.egg
+*.egg-info/
+__pycache__/
+.Python
+.venv/
+venv/
+build/
+dist/
+
+# Testing / Coverage
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Environment / Secrets
+.env
+.env.local
+.env.*.local
+.env.bak
+*.key
+*.pem
+credentials.json
+gmail_token.json
+
+# IDE
+.idea/
+.vscode/
+*.swo
+*.swp
+*~
+
+# OS
+.DS_Store
+Desktop.ini
+Thumbs.db
+
+# Logs
+*.log
+
+# CDK
+agentcore/cdk/cdk.out/
+agentcore/cdk/node_modules/
+cdk.out/
+
+# AgentCore CLI
+agentcore/.cli/deployed-state.json
+agentcore/aws-targets.json
