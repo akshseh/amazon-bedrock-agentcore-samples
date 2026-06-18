@@ -1,0 +1,1 @@
+[{"name":"get-email","description":"Retrieve full email content from the inbox. Returns sender, subject, body, timestamp, attachments. Call this first before triaging.","inputSchema":{"type":"object","properties":{"message_id":{"type":"string","description":"The unique message identifier"}},"required":["message_id"]}}]
